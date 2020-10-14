@@ -1,7 +1,9 @@
 package com.example.demo;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -17,6 +19,10 @@ public class User {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Role> roles;
+
+    @OneToMany(cascade = CascadeType.ALL,
+            mappedBy = "user", orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -40,5 +46,20 @@ public class User {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
+    }
+
+    public void addAddresses(Address... addresses) {
+        for (Address address : addresses) {
+            this.addresses.add(address);
+            address.setUser(this);
+        }
     }
 }

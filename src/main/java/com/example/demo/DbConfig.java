@@ -57,7 +57,7 @@ public class DbConfig {
         dataSource.setUsername("postgres");
         dataSource.setPassword("123456");
         dataSource.setUrl(
-                "jdbc:postgresql://localhost:5432/demo");
+                "jdbc:postgresql://localhost:5432/test");
         return dataSource;
     }
 

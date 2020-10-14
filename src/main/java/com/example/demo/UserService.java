@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -39,8 +40,8 @@ public class UserService implements Service1 {
 //    @Autowired
 //    JpaTransactionManager transactionManager;
 //
-//    @Autowired
-//    EntityManagerFactory entityManagerFactory;
+    @Autowired
+    EntityManagerFactory entityManagerFactory;
 
     TestService testService;
 
@@ -60,21 +61,56 @@ public class UserService implements Service1 {
 //        System.out.println(u);
 //        return user;
 
+        long id = userRepository.getNextUserId();
+        user.setId(id);
         entityManager.persist(user);
         Role role = new Role();
         role.setName("Admin");
         user.setRoles(Arrays.asList(role));
+        entityManager.detach(user);
+        System.out.println(user);
 
-        jdbcTemplate.query("select * from users", rs -> {
-
-        });
-
-        test();
         return user;
     }
 
+    //@PostConstruct
     public void test() {
-        System.out.println("test");
+        long id = 1;
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        User u1 = entityManager.find(User.class, id);
+        entityManager.detach(u1);
+        User u2 = entityManager.find(User.class, id);
+
+        System.out.println(u1.equals(u2));
+      //  System.out.println(u1.equals(u2));
+        User u11 = entityManager.merge(u1);
+      //  System.out.println(u1.equals(u2));
+        entityManager.getTransaction().commit();
+        entityManager.close();
+
+
+    }
+
+    @PostConstruct
+    public void testCreateChildren() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+
+        User user = entityManager.find(User.class, 1L);
+        user.setName("user name 1");
+        Address add1 = new Address();
+        add1.setAddress("address 1");
+        Address add2 = new Address();
+        add2.setAddress("address 2");
+
+        user.addAddresses(user.getAddresses().get(0));
+
+        user.addAddresses(add1, add2);
+        entityManager.merge(user);
+
+        entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
 
